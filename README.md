@@ -22,10 +22,10 @@
 
 ## 📌 TODO
 
-[ ] Release inference models and weights;
-[ ] Release training pipeline;
-[ ] Release adaptation pipeline;
-[ ] Release distillation pipeline
+- [ ] Release inference models and weights;
+- [ ] Release training pipeline;
+- [ ] Release adaptation pipeline;
+- [ ] Release distillation pipeline
 
 ---
 
