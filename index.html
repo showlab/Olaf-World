@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Olaf-World</title>
+    <meta name="description" content="Olaf-World: Orienting Latent Actions for Video World Modeling">
+    <meta name="keywords" content="world model, latent actions, video generation">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Olaf-World: Orienting Latent Actions for Video World Modeling">
+    <meta property="og:description" content="Olaf-World: Orienting Latent Actions for Video World Modeling">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Olaf-World: Orienting Latent Actions for Video World Modeling">
+    <meta name="twitter:description" content="Olaf-World: Orienting Latent Actions for Video World Modeling">
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="icon" type="image/png" href="assets/favicon_carrot.png">
+</head>
+<body>
+        <nav class="navbar" role="navigation" aria-label="main navigation">
+            <div class="navbar-brand">
+                <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                </a>
+            </div>
+            <div class="navbar-menu">
+                <div class="navbar-start" style="flex-grow: 1; justify-content: center;">
+                    <a class="navbar-item" href="https://yuxinn-j.github.io/">
+                    <span class="icon">
+                            <i class="fas fa-home"></i>
+                    </span>
+                    </a>
+
+                    <div class="navbar-item has-dropdown is-hoverable">
+                        <button class="navbar-link" type="button" aria-haspopup="true" aria-expanded="false">
+                            Related Research <span class="dropdown-caret" aria-hidden="true">▾</span>
+                        </button>
+                        <div class="navbar-dropdown">
+                            <a class="navbar-item" href="https://adaptable-world-model.github.io/">
+                                AdaWorld
+                            </a>
+                            <a class="navbar-item" href="https://csu-jpg.github.io/MIND.github.io/">
+                                MIND
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </nav>
+        <div class="container">
+        <header>
+            <h1><span style="color:#1F82C0">O</span><span style="color:#1CBF91">l</span><span style="color:#39C46E">a</span><span style="color:#149C7E">f</span>-World: <span style="color:#1F82C0">O</span>rienting <span style="color:#1CBF91">L</span>atent <span style="color:#39C46E">A</span>ctions <span style="color:#149C7E">f</span>or Video World Modeling</h1>
+            <p class="authors">
+                <span class="author">
+                <a href="https://yuxinn-j.github.io/">Yuxin Jiang</a><sup>1,2</sup>,</span>
+                <span class="author">
+                <a href="https://ycgu.site/">Yuchao Gu</a><sup>1</sup>,</span>
+                <span class="author">
+                <a href="https://www.a-star.edu.sg/cfar/about-cfar/management/prof-ivor-tsang/">Ivor W. Tsang</a><sup>2</sup>,
+                </span>
+                <span class="author">
+                <a href="https://sites.google.com/view/showlab/">Mike Zheng Shou</a><sup>1</sup>
+                </span>
+            </p>
+            <p class="affiliations">
+                <sup>1</sup>Show Lab, National University of Singapore &nbsp;&nbsp;&nbsp;
+                <sup>2</sup>CFAR & IHPC, Agency for Science, Technology and Research (A*STAR), Singapore
+            </p>
+            <p class="conference">arxiv 2026</p>
+            
+            <div class="links">
+                <!-- <a href="#" class="button">📄 Paper</a> -->
+                <a href="https://arxiv.org/abs/2509.25172" class="button">📊 arXiv</a>
+                <a href="https://github.com/showlab/Olaf-World" class="button">💻 Code</a>
+            </div>
+        </header>
+
+        <!-- TL;DR Section -->
+        <section class="tldr-section">
+            <div class="tldr-box">
+                <span class="tldr-label">TL;DR</span>
+                <span class="tldr-text">
+                    unlabeled video → transferable latent actions via control-effect alignment → zero-shot action transfer and data-efficient adaptation for video world models.
+                </span>
+            </div>
+        </section>
+
+        <!-- Teaser GIF Section -->
+        <section class="teaser">
+            <div class="teaser-container">
+                <img src="assets/teaser.gif" alt="Olaf-World Teaser" class="teaser-gif">
+                <p class="teaser-caption">TODO...</p>
+            </div>
+        </section>
+
+        <!-- Abstract Section -->
+        <section class="abstract">
+            <h2>Abstract</h2>
+            <p>
+                Scaling action-controllable world models is limited by the scarcity of action labels. 
+                While latent action learning promises to extract control interfaces from unlabeled video, learned latents often fail to transfer across contexts: they entangle scene-specific cues and lack a shared coordinate system. 
+                This occurs because standard objectives operate only within each clip, providing no mechanism to align action semantics across contexts. 
+                Our key insight is that although actions are unobserved, their semantic effects are observable and can serve as a shared reference. 
+                We introduce <strong>SeqΔ-REPA</strong>, a sequence-level control-effect alignment objective that anchors integrated latent action to temporal feature differences from a frozen, self-supervised video encoder. 
+                Building on this, we present <strong>Olaf-World</strong>, a pipeline that pretrains action-conditioned video world models from large-scale passive video. 
+                Extensive experiments demonstrate that our method learns a more structured latent action space, leading to stronger zero-shot action transfer and more data-efficient adaptation to new control interfaces than state-of-the-art baselines.
+            </p>
+        </section>
+
+        <!-- Overview Section -->
+        <section class="overview">
+            <h2>Method Overview</h2>
+
+            <div class="method-subsection split">
+                <div class="method-split">
+                    <div class="method-text">
+                        <h3>Why latent actions fail to transfer?</h3>
+                        <p>
+                        Transition-based latent action models (LAMs) often achieve low reconstruction error within each clip,
+                        yet the latent directions are not comparable across contexts. Two common failure modes are:
+                        <b>(1) shortcut learning</b>: latents entangle context cues rather than action effects and
+                        <b>(2) cross-context non-identifiability</b>: each context induces its own latent coordinate system.
+                        As a result, the same semantic action (e.g., “Forward”) may correspond to different latent directions in different environments,
+                        leading to poor action transfer.
+                        </p>
+                    </div>
+                    <div class="figure-container">
+                        <img src="assets/methods/problem.png" alt="SeqΔ-REPA aligns latent actions using effect directions" class="method-figure">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="method-subsection">
+                <h3>Our insight: align actions by observable effects</h3>
+                <p>
+                Although actions are unobserved, action-induced changes are visible in video.
+                We compute an <b>effect direction</b> in a frozen self-supervised video representation and use it as a cross-context reference.
+                <b>SeqΔ-REPA</b>, a sequence-level control-effect alignment objective, aligns latent-action trajectories to these effect directions, encouraging a shared latent coordinate system and more consistent action semantics across environments.
+                </p>
+
+                <div class="figure-container figure-compact">
+                <img src="assets/methods/solution.png" alt="SeqΔ-REPA aligns latent actions using effect directions" class="method-figure figure-compact-img">
+                </div>
+            </div>
+
+            <div class="method-subsection">
+                <h3>Results (Latent Space Diagnostics)</h3>
+                 <p>
+                    We validate transferability with two simple diagnostics that probe whether the learned latent-action space
+                    forms a shared coordinate system across contexts.
+                </p>
+
+                <div class="method-split">
+                    <div class="method-text">
+                       <h4>(1) Cross-context linear probing</h4>
+                        <p>
+                            We train a linear probe on one context (<b>1st-P</b>) and evaluate on another (<b>3rd-P</b>), where viewpoint and appearance differ.
+                            SeqΔ-REPA improves <b>in-context decodability</b> (solid lines) and, more importantly,
+                            <b>cross-context transfer</b> (dashed lines), indicating more context-invariant latent actions.
+                            In line with the REPA line of work, we also observe a clear early-stage performance boost, aka learning latent action is easier than you think.
+                        </p>
+                    </div>
+                    <div class="figure-container">
+                        <img src="assets/methods/probe.png" alt="Cross-context linear probing results" class="method-figure">
+                    </div>
+                </div>
+
+                <div class="method-split reverse">
+                    <div class="method-text">
+                        <h4>(2) Cross-context action similarity (cosine)</h4>
+                        <p>
+                        We compute per-action prototypes within each context and visualize cosine similarity between <b>1st-P</b> (rows) and <b>3rd-P</b> (columns also highlighted in <span style="background:#dcdcdc; padding:0 4px; border-radius:4px;">gray</span>) prototypes.
+                        A well-aligned latent space is <b>diagonal-dominant</b>, meaning each action matches its cross-context counterpart more than other actions.
+                        SeqΔ-REPA produces a sharper diagonal, while baselines show broadly high similarity, suggesting entangled or poorly anchored action directions.
+                        </p>
+
+                    </div>
+                    <div class="figure-container">
+                        <img src="assets/methods/cross-sim.png" alt="Cosine similarity / alignment results" class="method-figure">
+                    </div>
+                </div>
+                
+            </div>
+        </section>
+
+        <!-- Navigation Bar -->
+        <nav class="nav-bar">
+            <h2 style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #4a90e2; color: #2980b9;\">Downstream World Model Results</h2>
+            
+            <!-- Section 1: Zero-Shot Action Transfer -->
+            <div class="nav-section">
+                <div class="nav-section-title">1. Zero-Shot Action Transfer</div>
+                <div class="nav-subsection">
+                    <a href="#action-transfer-comparison" class="nav-link">1.1 Qualitative Comparison</a>
+                    <a href="#action-transfer-contexts" class="nav-link">1.2 Transfer to Different Contexts</a>
+                    <a href="#action-transfer-1context" class="nav-link">1.3 Transfer Various Actions into One Context</a>
+                    <a href="#action-transfer-interesting" class="nav-link">1.4 Interesting Cases</a>
+                </div>
+            </div>
+
+            <!-- Section 2: World Model Adaptation -->
+            <div class="nav-section">
+                <div class="nav-section-title">2. World Model Adaptation</div>
+                <div class="nav-subsection">
+                    <span style="font-weight: 600; color: #2c3e50; padding: 8px 0;">2.1 Efficient Adaptation Comparison</span>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-left: 20px;">
+                        <a href="#adaptation-first" class="nav-link">2.1.1 First-Person (1ST-P)</a>
+                        <a href="#adaptation-third" class="nav-link">2.1.2 Third-Person (3RD-P)</a>
+                    </div>
+                </div>
+                <div class="nav-subsection">
+                    <span style="font-weight: 600; color: #2c3e50; padding: 8px 0;">2.2 More Adaptation Results</span>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-left: 20px;">
+                        <a href="#adaptation-iid-first" class="nav-link">2.2.1 First-Person (1ST-P)</a>
+                        <a href="#adaptation-iid-third" class="nav-link">2.2.2 Third-Person (3RD-P)</a>
+                        <a href="#adaptation-generalization" class="nav-link">2.2.3 Novel Scenes</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Section 1: Zero-Shot Action Transfer -->
+        <section id="action-transfer">
+            <h2>1. Zero-Shot Action Transfer</h2>
+
+            <!-- 1.1 Qualitative Comparison -->
+            <div class="subsection" id="action-transfer-comparison">
+                <h3>1.1 Qualitative Comparison</h3>
+                <p>
+                    Comparison of action transfer quality between AdaWorld baseline and our method. 
+                    Each row shows the action reference video, AdaWorld's result, and our method's result.
+                </p>
+                
+                <div class="video-grid sync-group" data-group="comparison-0">
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/action_transfer_comparison/0_source.mp4" type="video/mp4">
+                            Your browser does not support the video tag or this video format.
+                        </video>
+                        <div class="video-label">Action Reference</div>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/action_transfer_comparison/0_adaworld.mp4" type="video/mp4">
+                            Your browser does not support the video tag or this video format.
+                        </video>
+                        <div class="video-label">AdaWorld</div>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/action_transfer_comparison/0_ours.mp4" type="video/mp4">
+                            Your browser does not support the video tag or this video format.
+                        </video>
+                        <div class="video-label">Olaf-World</div>
+                    </div>
+                </div>
+
+                <div class="video-grid sync-group" data-group="comparison-1">
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/action_transfer_comparison/1_source.mp4" type="video/mp4">
+                            Your browser does not support the video tag or this video format.
+                        </video>
+                        <div class="video-label">Action Reference</div>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/action_transfer_comparison/1_adaworld.mp4" type="video/mp4">
+                            Your browser does not support the video tag or this video format.
+                        </video>
+                        <div class="video-label">AdaWorld</div>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/action_transfer_comparison/1_ours.mp4" type="video/mp4">
+                            Your browser does not support the video tag or this video format.
+                        </video>
+                        <div class="video-label">Olaf-World</div>
+                    </div>
+                </div>
+
+                <div class="video-grid sync-group" data-group="comparison-2">
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/action_transfer_comparison/2_source.mp4" type="video/mp4">
+                            Your browser does not support the video tag or this video format.
+                        </video>
+                        <div class="video-label">Action Reference</div>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/action_transfer_comparison/2_adaworld.mp4" type="video/mp4">
+                            Your browser does not support the video tag or this video format.
+                        </video>
+                        <div class="video-label">AdaWorld</div>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/action_transfer_comparison/2_ours.mp4" type="video/mp4">
+                            Your browser does not support the video tag or this video format.
+                        </video>
+                        <div class="video-label">Olaf-World</div>
+                    </div>
+                </div>
+
+                <div class="video-grid sync-group" data-group="comparison-3">
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/action_transfer_comparison/3_source.mp4" type="video/mp4">
+                            Your browser does not support the video tag or this video format.
+                        </video>
+                        <div class="video-label">Action Reference</div>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/action_transfer_comparison/3_adaworld.mp4" type="video/mp4">
+                            Your browser does not support the video tag or this video format.
+                        </video>
+                        <div class="video-label">AdaWorld</div>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/action_transfer_comparison/3_ours.mp4" type="video/mp4">
+                            Your browser does not support the video tag or this video format.
+                        </video>
+                        <div class="video-label">Olaf-World</div>
+                    </div>
+                </div>
+
+                <div class="video-grid sync-group" data-group="comparison-4">
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/action_transfer_comparison/4_source.mp4" type="video/mp4">
+                            Your browser does not support the video tag or this video format.
+                        </video>
+                        <div class="video-label">Action Reference</div>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/action_transfer_comparison/4_adaworld.mp4" type="video/mp4">
+                            Your browser does not support the video tag or this video format.
+                        </video>
+                        <div class="video-label">AdaWorld</div>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/action_transfer_comparison/4_ours.mp4" type="video/mp4">
+                            Your browser does not support the video tag or this video format.
+                        </video>
+                        <div class="video-label">Olaf-World</div>
+                    </div>
+                </div>
+
+                <div class="video-grid sync-group" data-group="comparison-5">
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/action_transfer_comparison/5_source.mp4" type="video/mp4">
+                            Your browser does not support the video tag or this video format.
+                        </video>
+                        <div class="video-label">Action Reference</div>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/action_transfer_comparison/5_adaworld.mp4" type="video/mp4">
+                            Your browser does not support the video tag or this video format.
+                        </video>
+                        <div class="video-label">AdaWorld</div>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/action_transfer_comparison/5_ours.mp4" type="video/mp4">
+                            Your browser does not support the video tag or this video format.
+                        </video>
+                        <div class="video-label">Olaf-World</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 1.2 Transfer to Different Contexts -->
+            <div class="subsection" id="action-transfer-contexts">
+                <h3>1.2 Transfer to Different Contexts</h3>
+                <p>
+                    Our method can transfer the same source action to multiple different contexts.
+                </p>
+
+                <div class="video-grid sync-group" data-group="contexts-0">
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/action_transfer_more/0_Source.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                        <div class="video-label">Action Reference</div>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/action_transfer_more/0_C1.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                        <div class="video-label">Context A</div>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/action_transfer_more/0_C2.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                        <div class="video-label">Context B</div>
+                    </div>
+                </div>
+
+                <div class="video-grid sync-group" data-group="contexts-1">
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/action_transfer_more/1_Source.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                        <div class="video-label">Action Reference</div>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/action_transfer_more/1_C1.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                        <div class="video-label">Context A</div>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/action_transfer_more/1_C2.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                        <div class="video-label">Context B</div>
+                    </div>
+                </div>
+
+                <div class="video-grid sync-group" data-group="contexts-2">
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/action_transfer_more/2_Source.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                        <div class="video-label">Action Reference</div>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/action_transfer_more/2_C1.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                        <div class="video-label">Context A</div>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/action_transfer_more/2_C2.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                        <div class="video-label">Context B</div>
+                    </div>
+                </div>
+
+                <div class="video-grid sync-group" data-group="contexts-3">
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/action_transfer_more/3_Source.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                        <div class="video-label">Action Reference</div>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/action_transfer_more/3_C1.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                        <div class="video-label">Context A</div>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/action_transfer_more/3_C2.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                        <div class="video-label">Context B</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 1.3 Transfer Various Actions into One Context -->
+            <div class="subsection small-labels" id="action-transfer-1context">
+                <h3>1.3 Transfer Various Actions into One Context</h3>
+                <p>
+                    Demonstration of transferring multiple different actions from various source contexts into a single target context.
+                    Each pair shows the source action reference and the transferred result in the target context.
+                </p>
+                
+                <div class="video-grid-4col">
+                    <!-- Pair 0_0: Source and Transfer -->
+                    <div class="sync-group" data-group="1context-0-0" style="display: contents;">
+                        <div class="video-container">
+                            <video controls loop preload="metadata" muted>
+                                <source src="assets/action_transfer_1context/0_0_Source.mp4" type="video/mp4">
+                                Your browser does not support this video format.
+                            </video>
+                            <div class="video-label">Source (a)</div>
+                        </div>
+                        <div class="video-container">
+                            <video controls loop preload="metadata" muted>
+                                <source src="assets/action_transfer_1context/0_0_Transfer.mp4" type="video/mp4">
+                                Your browser does not support this video format.
+                            </video>
+                            <div class="video-label">Transfer (a)</div>
+                        </div>
+                    </div>
+
+                    <!-- Pair 0_1: Source and Transfer -->
+                    <div class="sync-group" data-group="1context-0-1" style="display: contents;">
+                        <div class="video-container">
+                            <video controls loop preload="metadata" muted>
+                                <source src="assets/action_transfer_1context/0_1_Source.mp4" type="video/mp4">
+                                Your browser does not support this video format.
+                            </video>
+                            <div class="video-label">Source (b)</div>
+                        </div>
+                        <div class="video-container">
+                            <video controls loop preload="metadata" muted>
+                                <source src="assets/action_transfer_1context/0_1_Transfer.mp4" type="video/mp4">
+                                Your browser does not support this video format.
+                            </video>
+                            <div class="video-label">Transfer (b)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="video-grid-4col">
+                    <!-- Pair 1_0: Source and Transfer -->
+                    <div class="sync-group" data-group="1context-1-0" style="display: contents;">
+                        <div class="video-container">
+                            <video controls loop preload="metadata" muted>
+                                <source src="assets/action_transfer_1context/1_0_Source.mp4" type="video/mp4">
+                                Your browser does not support this video format.
+                            </video>
+                            <div class="video-label">Source (c)</div>
+                        </div>
+                        <div class="video-container">
+                            <video controls loop preload="metadata" muted>
+                                <source src="assets/action_transfer_1context/1_0_Transfer.mp4" type="video/mp4">
+                                Your browser does not support this video format.
+                            </video>
+                            <div class="video-label">Transfer (c)</div>
+                        </div>
+                    </div>
+
+                    <!-- Pair 1_1: Source and Transfer -->
+                    <div class="sync-group" data-group="1context-1-1" style="display: contents;">
+                        <div class="video-container">
+                            <video controls loop preload="metadata" muted>
+                                <source src="assets/action_transfer_1context/1_1_Source.mp4" type="video/mp4">
+                                Your browser does not support this video format.
+                            </video>
+                            <div class="video-label">Source (d)</div>
+                        </div>
+                        <div class="video-container">
+                            <video controls loop preload="metadata" muted>
+                                <source src="assets/action_transfer_1context/1_1_Transfer.mp4" type="video/mp4">
+                                Your browser does not support this video format.
+                            </video>
+                            <div class="video-label">Transfer (d)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="video-grid-4col">
+                    <!-- Pair 2_0: Source and Transfer -->
+                    <div class="sync-group" data-group="1context-2-0" style="display: contents;">
+                        <div class="video-container">
+                            <video controls loop preload="metadata" muted>
+                                <source src="assets/action_transfer_1context/2_0_Source.mp4" type="video/mp4">
+                                Your browser does not support this video format.
+                            </video>
+                            <div class="video-label">Source (e)</div>
+                        </div>
+                        <div class="video-container">
+                            <video controls loop preload="metadata" muted>
+                                <source src="assets/action_transfer_1context/2_0_Transfer.mp4" type="video/mp4">
+                                Your browser does not support this video format.
+                            </video>
+                            <div class="video-label">Transfer (e)</div>
+                        </div>
+                    </div>
+
+                    <!-- Pair 2_1: Source and Transfer -->
+                    <div class="sync-group" data-group="1context-2-1" style="display: contents;">
+                        <div class="video-container">
+                            <video controls loop preload="metadata" muted>
+                                <source src="assets/action_transfer_1context/2_1_Source.mp4" type="video/mp4">
+                                Your browser does not support this video format.
+                            </video>
+                            <div class="video-label">Source (f)</div>
+                        </div>
+                        <div class="video-container">
+                            <video controls loop preload="metadata" muted>
+                                <source src="assets/action_transfer_1context/2_1_Transfer.mp4" type="video/mp4">
+                                Your browser does not support this video format.
+                            </video>
+                            <div class="video-label">Transfer (f)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 1.4 Interesting Cases -->
+            <div class="subsection small-labels" id="action-transfer-interesting">
+                <h3>1.4 Interesting Cases</h3>
+                <p>
+                    As an add-on, we showcases a few interesting and diverse action-sequence transfer examples from Olaf-World, 
+                    beyond movement and camera control, <b>e.g., flying, shooting, combat (melee attacks + special/ultimate moves), and object despawn</b>.
+                    Each pair shows the source reference video and its corresponding transferred result side by side. 
+                </p>
+                
+                <div class="video-grid-4col">
+                    <!-- Pair 0_0: Source and Transfer -->
+                    <div class="sync-group" data-group="interesting-0-0" style="display: contents;">
+                        <div class="video-container">
+                            <video controls loop preload="metadata" muted>
+                                <source src="assets/action_transfer_interesting/0_0_Source.mp4" type="video/mp4">
+                                Your browser does not support this video format.
+                            </video>
+                            <div class="video-label">Source (a)</div>
+                        </div>
+                        <div class="video-container">
+                            <video controls loop preload="metadata" muted>
+                                <source src="assets/action_transfer_interesting/0_0_Transfer.mp4" type="video/mp4">
+                                Your browser does not support this video format.
+                            </video>
+                            <div class="video-label">Transfer (a)</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pair 0_1: Source and Transfer -->
+                    <div class="sync-group" data-group="interesting-0-1" style="display: contents;">
+                        <div class="video-container">
+                            <video controls loop preload="metadata" muted>
+                                <source src="assets/action_transfer_interesting/0_1_Source.mp4" type="video/mp4">
+                                Your browser does not support this video format.
+                            </video>
+                            <div class="video-label">Source (b)</div>
+                        </div>
+                        <div class="video-container">
+                            <video controls loop preload="metadata" muted>
+                                <source src="assets/action_transfer_interesting/0_1_Transfer.mp4" type="video/mp4">
+                                Your browser does not support this video format.
+                            </video>
+                            <div class="video-label">Transfer (b)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="video-grid-4col" style="margin-top: 30px;">
+                    <!-- Pair 1_0: Source and Transfer -->
+                    <div class="sync-group" data-group="interesting-1-0" style="display: contents;">
+                        <div class="video-container">
+                            <video controls loop preload="metadata" muted>
+                                <source src="assets/action_transfer_interesting/1_0_Source.mp4" type="video/mp4">
+                                Your browser does not support this video format.
+                            </video>
+                            <div class="video-label">Source (c)</div>
+                        </div>
+                        <div class="video-container">
+                            <video controls loop preload="metadata" muted>
+                                <source src="assets/action_transfer_interesting/1_0_Transfer.mp4" type="video/mp4">
+                                Your browser does not support this video format.
+                            </video>
+                            <div class="video-label">Transfer (c)</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pair 1_1: Source and Transfer -->
+                    <div class="sync-group" data-group="interesting-1-1" style="display: contents;">
+                        <div class="video-container">
+                            <video controls loop preload="metadata" muted>
+                                <source src="assets/action_transfer_interesting/1_1_Source.mp4" type="video/mp4">
+                                Your browser does not support this video format.
+                            </video>
+                            <div class="video-label">Source (d)</div>
+                        </div>
+                        <div class="video-container">
+                            <video controls loop preload="metadata" muted>
+                                <source src="assets/action_transfer_interesting/1_1_Transfer.mp4" type="video/mp4">
+                                Your browser does not support this video format.
+                            </video>
+                            <div class="video-label">Transfer (d)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="video-grid-4col" style="margin-top: 30px;">
+                    <!-- Pair 2_0: Source and Transfer -->
+                    <div class="sync-group" data-group="interesting-2-0" style="display: contents;">
+                        <div class="video-container">
+                            <video controls loop preload="metadata" muted>
+                                <source src="assets/action_transfer_interesting/2_0_Source.mp4" type="video/mp4">
+                                Your browser does not support this video format.
+                            </video>
+                            <div class="video-label">Source (e)</div>
+                        </div>
+                        <div class="video-container">
+                            <video controls loop preload="metadata" muted>
+                                <source src="assets/action_transfer_interesting/2_0_Transfer.mp4" type="video/mp4">
+                                Your browser does not support this video format.
+                            </video>
+                            <div class="video-label">Transfer (e)</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pair 2_1: Source and Transfer -->
+                    <div class="sync-group" data-group="interesting-2-1" style="display: contents;">
+                        <div class="video-container">
+                            <video controls loop preload="metadata" muted>
+                                <source src="assets/action_transfer_interesting/2_1_Source.mp4" type="video/mp4">
+                                Your browser does not support this video format.
+                            </video>
+                            <div class="video-label">Source (f)</div>
+                        </div>
+                        <div class="video-container">
+                            <video controls loop preload="metadata" muted>
+                                <source src="assets/action_transfer_interesting/2_1_Transfer.mp4" type="video/mp4">
+                                Your browser does not support this video format.
+                            </video>
+                            <div class="video-label">Transfer (f)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: World Model Adaptation -->
+        <section id="efficient-adaptation">
+            <h2>2. World Model Adaptation</h2>
+
+            <!-- 2.1 Efficient Adaptation Comparison -->
+            <div class="subsection" id="adaptation-comparison">
+                <h3 class="subsection-title">2.1 Efficient Adaptation Comparison</h3>
+                <p>
+                We compare DirectAct, AdaWorld, and Olaf-World under different adaptation data budgets:
+                <b>#videos = 0, 1, 50</b> (0-shot, <b>~1 min</b>, <b>~2 hours</b> of action-labeled video).
+                All methods use the same adaptation setup with LoRA rank = 16.
+                Under the <b>~1 min</b> budget, <b>DirectAct</b> tends to
+                <span style="font-weight:700; color:#c0392b;">overfit</span>
+                and <b>AdaWorld</b> follows actions
+                <span style="font-weight:700; color:#c0392b;">less reliably</span>,
+                while <b>Olaf-World</b> remains
+                <span style="font-weight:700; color:#27ae60;">consistently controllable</span>.
+                </p>
+
+            </div>
+
+            <!-- 2.1.1 First-View -->
+            <div class="subsection subsubsection" id="adaptation-first">
+                <h3 class="subsubsection-title">2.1.1 First-Person (1ST-P)</h3>
+
+                <div class="comparison-grid sync-group" data-group="adapt-first-all">
+                    <div></div>
+                    <div class="method-header">DirectAct</div>
+                    <div class="method-header">AdaWorld</div>
+                    <div class="method-header">Olaf-World</div>
+                    
+                    <!-- 0-shot -->
+                    <div class="data-label-left">0</div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/efficeint_adaptation_1st/0_Raw.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/efficeint_adaptation_1st/0_Vae.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/efficeint_adaptation_1st/0_Ours.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+
+                    <!-- 1-shot -->
+                    <div class="data-label-left">1</div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/efficeint_adaptation_1st/1_Raw.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/efficeint_adaptation_1st/1_Vae.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/efficeint_adaptation_1st/1_Ours.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+
+                    <!-- 2-shot -->
+                    <div class="data-label-left">50</div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/efficeint_adaptation_1st/2_Raw.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/efficeint_adaptation_1st/2_Vae.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/efficeint_adaptation_1st/2_Ours.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2.1.2 Third-View -->
+            <div class="subsection subsubsection" id="adaptation-third">
+                <h3 class="subsubsection-title">2.1.2 Third-Person (3RD-P)</h3>
+
+                <div class="comparison-grid sync-group" data-group="adapt-third-all">
+                    <div></div>
+                    <div class="method-header">DirectAct</div>
+                    <div class="method-header">AdaWorld</div>
+                    <div class="method-header">Olaf-World</div>
+                    
+                    <!-- 0-shot -->
+                    <div class="data-label-left">0</div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/efficeint_adaptation_3rd/0_Raw.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/efficeint_adaptation_3rd/0_Vae.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/efficeint_adaptation_3rd/0_Ours.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+
+                    <!-- 1-shot -->
+                    <div class="data-label-left">1</div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/efficeint_adaptation_3rd/1_Raw.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/efficeint_adaptation_3rd/1_Vae.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/efficeint_adaptation_3rd/1_Ours.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+
+                    <!-- 2-shot -->
+                    <div class="data-label-left">50</div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/efficeint_adaptation_3rd/2_Raw.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/efficeint_adaptation_3rd/2_Vae.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/efficeint_adaptation_3rd/2_Ours.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2.2 More Adaptation Results -->
+            <div class="subsection" id="adaptation-more">
+                <h3 class="subsection-title">2.2 More Adaptation Results</h3>
+                <p>
+                    Additional results from Olaf-World for the 50-video adaptation setting, evaluating both in-domain performance and generalization to unseen contexts.
+                </p>
+            </div>
+
+            <!-- 2.2.1 IID First-View -->
+            <div class="subsection subsubsection" id="adaptation-iid-first">
+                <h3 class="subsubsection-title">2.2.1 First-Person (1ST-P)</h3>
+                <div class="video-grid sync-group" data-group="iid-1st-0">
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/adaptation_1st/0_0.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/adaptation_1st/0_1.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/adaptation_1st/0_2.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                </div>
+
+                <div class="video-grid sync-group" data-group="iid-1st-1">
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/adaptation_1st/1_0.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/adaptation_1st/1_1.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/adaptation_1st/1_2.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2.2.2 IID Third-View -->
+            <div class="subsection subsubsection" id="adaptation-iid-third">
+                <h3 class="subsubsection-title">2.2.2 Third-Person (3RD-P)</h3>
+
+                <div class="video-grid sync-group" data-group="iid-3rd-0">
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/adaptation_3rd/0_0.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/adaptation_3rd/0_1.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/adaptation_3rd/0_2.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                </div>
+
+                <div class="video-grid sync-group" data-group="iid-3rd-1">
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/adaptation_3rd/1_0.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/adaptation_3rd/1_1.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/adaptation_3rd/1_2.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2.2.3 Generalization Test -->
+            <div class="subsection subsubsection" id="adaptation-generalization">
+                <h3 class="subsubsection-title">2.2.3 Generalization to Novel Scenes</h3>
+                
+                <div class="video-grid sync-group" data-group="gen-ood-0">
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/generalization_ood/0_0.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/generalization_ood/0_1.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/generalization_ood/0_2.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                </div>
+
+                <div class="video-grid sync-group" data-group="gen-ood-1">
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/generalization_ood/1_0.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/generalization_ood/1_1.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/generalization_ood/1_2.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                </div>
+
+                <div class="video-grid sync-group" data-group="gen-ood-2">
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/generalization_ood/2_0.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/generalization_ood/2_1.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/generalization_ood/2_2.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                </div>
+
+                <div class="video-grid sync-group" data-group="gen-ood-3">
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/generalization_ood/3_0.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/generalization_ood/3_1.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                    <div class="video-container">
+                        <video controls loop preload="metadata" muted>
+                            <source src="assets/generalization_ood/3_2.mp4" type="video/mp4">
+                            Your browser does not support this video format.
+                        </video>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="bibtex" id="bibtex">
+            <h2>BibTeX</h2>
+            <p>If you find our work useful, please consider citing:</p>
+            <div class="bibtex-box">
+                <button class="copy-btn" onclick="copyBibtex()">📋 Copy</button>
+                <pre><code>@inproceedings{jiang2023scenimefy,
+      author = {Jiang, Yuxin and Jiang, Liming and Yang, Shuai and Loy, Chen Change},
+      title = {Scenimefy: Learning to Craft Anime Scene via Semi-Supervised Image-to-Image Translation},
+      booktitle = {ICCV},
+      year = {2023},
+    }</code></pre>
+            </div>
+        </section>
+
+        <footer>
+            <p style="margin-top: 10px;">This website is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
