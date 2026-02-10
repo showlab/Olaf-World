@@ -371,6 +371,7 @@ h1 {
 }
 
 .teaser-gif {
+    width: 80%;
     max-width: 100%;
     height: auto;
     border-radius: 8px;
