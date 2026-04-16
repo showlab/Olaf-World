@@ -250,14 +250,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Copy BibTeX to clipboard
 function copyBibtex() {
-    const bibtexText = `@misc{jiang2026olafworldorientinglatentactions,
-      title={Olaf-World: Orienting Latent Actions for Video World Modeling}, 
-      author={Yuxin Jiang and Yuchao Gu and Ivor W. Tsang and Mike Zheng Shou},
-      year={2026},
-      eprint={2602.10104},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV},
-      url={https://arxiv.org/abs/2602.10104}, 
+    const bibtexText = `@article{jiang2026olaf,
+  title={Olaf-World: Orienting Latent Actions for Video World Modeling},
+  author={Jiang, Yuxin and Gu, Yuchao and Tsang, Ivor W and Shou, Mike Zheng},
+  journal={arXiv preprint arXiv:2602.10104},
+  year={2026}
 }`;
     
     navigator.clipboard.writeText(bibtexText).then(() => {

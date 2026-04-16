@@ -20,6 +20,9 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="icon" type="image/png" href="assets/favicon_carrot.png">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
         <nav class="navbar" role="navigation" aria-label="main navigation">
@@ -78,8 +81,15 @@
             
             <div class="links">
                 <!-- <a href="#" class="button">📄 Paper</a> -->
-                <a href="https://arxiv.org/abs/2602.10104" class="button">📄 arXiv</a>
-                <a href="https://github.com/showlab/Olaf-World" class="button">💻 Code</a>
+                <a href="https://arxiv.org/abs/2602.10104" class="button">
+                    <i class="ai ai-arxiv"></i> Paper
+                </a>
+                <a href="https://github.com/showlab/Olaf-World" class="button">
+                    <i class="fa-brands fa-github"></i> Code
+                </a>
+                <a href="https://huggingface.co/YuxinJ/Olaf-World" class="button">
+                    <img src="https://huggingface.co/front/assets/huggingface_logo-noborder.svg" alt="Hugging Face" style="height:1em; vertical-align:-0.15em;"> Model
+                </a>
             </div>
         </header>
 
@@ -1106,14 +1116,11 @@
             <p>If you find our work useful, please consider citing:</p>
             <div class="bibtex-box">
                 <button class="copy-btn" onclick="copyBibtex()">📋 Copy</button>
-                <pre><code>@misc{jiang2026olafworldorientinglatentactions,
-      title={Olaf-World: Orienting Latent Actions for Video World Modeling}, 
-      author={Yuxin Jiang and Yuchao Gu and Ivor W. Tsang and Mike Zheng Shou},
-      year={2026},
-      eprint={2602.10104},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV},
-      url={https://arxiv.org/abs/2602.10104}, 
+                <pre><code>@article{jiang2026olaf,
+  title={Olaf-World: Orienting Latent Actions for Video World Modeling},
+  author={Jiang, Yuxin and Gu, Yuchao and Tsang, Ivor W and Shou, Mike Zheng},
+  journal={arXiv preprint arXiv:2602.10104},
+  year={2026}
 }</code></pre>
             </div>
         </section>
