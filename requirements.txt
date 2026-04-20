@@ -1,0 +1,61 @@
+# --- Diffusion stack ---
+diffusers==0.31.0
+transformers>=4.49.0
+tokenizers>=0.20.3
+accelerate>=1.1.1
+peft>=0.12.0
+ftfy
+einops
+tqdm
+omegaconf
+huggingface_hub[cli]
+
+# --- Vision / media ---
+opencv-python>=4.9.0.80
+scikit-image
+imageio
+imageio-ffmpeg
+matplotlib
+av==13.1.0
+
+# --- Models / datasets / misc ---
+git+https://github.com/openai/CLIP.git
+open_clip_torch
+sentencepiece
+easydict
+wandb
+numpy==1.24.4
+pycocotools
+lmdb
+dominate
+pydantic==2.10.6
+starlette
+flask
+flask-socketio
+
+# --- LAM (lam/ training + lam_adapt/ evaluation) ---
+lightning
+jsonargparse[signatures]
+tensorboard
+piq
+kmeans_pytorch
+scikit-learn
+timm
+# umap-learn is optional — only used by build_lam_lookup_and_viz_mind.py
+# for the UMAP scatter plot; install manually if you want it.
+#
+# V-JEPA 2 teacher (LAMAlign with teacher_type=vjepa only):
+#   git clone https://github.com/facebookresearch/vjepa2.git
+#   export VJEPA2_ROOT=/path/to/vjepa2
+# See docs/lam.md for details.
+
+# --- Video / CV ---
+pytorchvideo
+# If you need ONNX CPU (avoid GPU-cuda conflicts):
+onnx
+onnxruntime
+onnxscript
+onnxconverter_common
+
+# --- TensorRT (CUDA 12 wheels) ---
+tensorrt-cu12

@@ -1,0 +1,26 @@
+checkpoints/
+vjepa2/
+data/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+
+# Env / IDE
+.venv/
+.env
+.DS_Store
+.vscode/
+.idea/
+
+# Training / inference outputs
+outputs/
+wandb/
+exp_logs/
+exp_ckpts/
+exp_imgs/
+log_imgs/
+*.log

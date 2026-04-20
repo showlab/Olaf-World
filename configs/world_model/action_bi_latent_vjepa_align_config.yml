@@ -1,0 +1,72 @@
+# Bidirectional Diffusion Configuration
+trainer: action_skyreels_diffusion
+causal: false
+
+# Model Configuration
+model_kwargs:
+  model_name: "SkyReels-V2-I2V-1.3B-540P"
+  timestep_shift: 5.0
+  is_causal: False
+  local_attn_size: -1
+  sink_size: 0
+  action_dim: 32
+
+# lam (frozen encoder)
+lam_ckpt: "checkpoints/lam/lam_vjepa_align.ckpt"
+lam_variant: "align"
+
+mixed_precision: true
+gradient_checkpointing: true
+seed: 0
+lr: 5e-5
+beta1: 0.9
+beta2: 0.95
+weight_decay: 0.001
+batch_size: 4
+max_grad_norm: 10.0
+
+num_train_timestep: 1000
+guidance_scale: 5
+timestep_shift: 5.0
+teacher_forcing: false
+noise_augmentation_max_timestep: 0
+
+image_or_video_shape: [4, 25, 16, 68, 120]  # [B, F, C, H, W]
+num_frame_per_block: 1
+independent_first_frame: false
+
+# Dataset
+load_raw_video: true
+action_video_data_dir: "data/MiraData"
+video_num_training_frames: 97 # 6 latent
+action_dim: 32
+skip_initial_seconds: 2.0
+negative_prompt: '色调艳丽，过曝，静态，细节模糊不清，字幕，风格，作品，画作，画面，静止，整体发灰，最差质量，低质量，JPEG压缩残留，丑陋的，残缺的，多余的手指，画得不好的手部，画得不好的脸部，畸形的，毁容的，形态畸形的肢体，手指融合，静止不动的画面，杂乱的背景，三条腿，背景人很多，倒着走'
+
+# image encoder
+clip_checkpoint: "checkpoints/SkyReels-V2-I2V-1.3B-540P/models_clip_open-clip-xlm-roberta-large-vit-huge-14.pth"
+clip_tokenizer: "checkpoints/SkyReels-V2-I2V-1.3B-540P/xlm-roberta-large"
+
+# Distributed Training
+sharding_strategy: hybrid_full  # Options: FULL_SHARD, SHARD_GRAD_OP, NO_SHARD
+generator_fsdp_wrap_strategy: size
+text_encoder_fsdp_wrap_strategy: size
+
+# EMA Configuration
+ema_weight: 0.99
+ema_start_step: 100 # TODO
+
+# Logging and Saving
+log_iters: 100
+gc_interval: 100
+no_save: false
+no_visualize: false
+
+# WandB Configuration
+# Fill in wandb_key / wandb_entity below only if you set disable_wandb: false.
+wandb_host: https://api.wandb.ai
+wandb_key: ""
+wandb_entity: ""
+wandb_project: olaf-world
+config_name: bi-latent-vjepa-align # Config name for wandb logging
+disable_wandb: true

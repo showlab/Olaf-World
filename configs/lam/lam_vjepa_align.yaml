@@ -1,0 +1,67 @@
+model:
+  image_channels: 3
+
+  lam_model_dim: 1024
+  lam_latent_dim: 32
+  lam_patch_size: 16
+  lam_enc_blocks: 16
+  lam_dec_blocks: 16
+  lam_num_heads: 16
+
+  lam_causal_temporal: true
+
+  beta: 0.0002
+  align_weight: 0.02
+  align_dim: 1408
+  teacher_type: vjepa
+  log_interval: 1000
+  log_path: exp_imgs
+  optimizer:
+    class_path: torch.optim.AdamW
+    init_args:
+      lr: 2.5e-5
+      weight_decay: 1e-2
+
+data:
+  class_path: lam.simple_dataset.SingleVideoDataModule
+  init_args:
+    data_root: data/MiraData
+    num_frames: 16
+    resolution: [272, 480]
+    target_fps: 16
+    batch_size: 4
+    random_start: true
+    skip_initial_seconds: 2.0
+    output_format: t h w c
+    ensure_divisible_by: 16
+    color_aug: false
+    brightness_jitter: 1.0
+    num_workers: 4
+    seed: 42
+
+trainer:
+  max_epochs: 1000
+  accelerator: gpu
+  num_nodes: 1
+  devices: 8
+  strategy: ddp_find_unused_parameters_false
+  precision: 16-mixed
+  log_every_n_steps: 1000
+  accumulate_grad_batches: 1
+  gradient_clip_val: 0.3
+
+  callbacks:
+    - class_path: lightning.pytorch.callbacks.ModelCheckpoint
+      init_args:
+        dirpath: exp_ckpts
+        verbose: true
+        save_last: true
+        save_top_k: -1
+        every_n_epochs: 10
+        monitor: train_loss
+
+  logger:
+    - class_path: lightning.pytorch.loggers.TensorBoardLogger
+      init_args:
+        save_dir: exp_logs
+        name: lam_align_vjepa
