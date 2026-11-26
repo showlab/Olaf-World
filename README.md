@@ -14,6 +14,7 @@
 ---
 
 ## 📢 Updates
+- [11/2026] 🔥 Our follow-up work [O²LaF](https://github.com/showlab/o2laf) is released, with code and model weights.
 - [04/2026] LAM training and inference code, plus pretrained weights, are released.
 - [02/2026] Repo and project page initialized.
 
